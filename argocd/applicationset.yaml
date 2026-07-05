@@ -14,10 +14,10 @@ spec:
         elements:
           - env: local
             url: https://kubernetes.default.svc
-          - env: dev
-            url: https://kubernetes.default.svc
-          - env: staging
-            url: https://kubernetes.default.svc
+#          - env: dev
+#            url: https://kubernetes.default.svc
+#          - env: staging
+#            url: https://kubernetes.default.svc
   template:
     metadata:
       name: 'api-gateway-{{env}}'
@@ -26,7 +26,7 @@ spec:
       source:
         # Update this URL to point to your actual GitOps Git repository
         repoURL: 'https://github.com/htphong01/gitops-demo.git'
-        targetRevision: HEAD
+        targetRevision: main
         path: 'k8s/overlays/{{env}}'
       destination:
         server: '{{url}}'
@@ -45,40 +45,40 @@ spec:
             duration: 5s    # Initial wait duration of 5 seconds
             maxDuration: 3m # Cap the wait duration at 3 minutes
             factor: 2       # Double the wait duration on each retry (5s, 10s, 20s...)
----
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: api-gateway-manual-sync
-  namespace: argocd
-spec:
-  # Generator targeting environments requiring manual approvals (Production)
-  generators:
-    - list:
-        elements:
-          - env: prod
-            url: https://kubernetes.default.svc
-  template:
-    metadata:
-      name: 'api-gateway-{{env}}'
-    spec:
-      project: default
-      source:
-        repoURL: 'https://github.com/htphong01/gitops-demo.git'
-        targetRevision: HEAD
-        path: 'k8s/overlays/{{env}}'
-      destination:
-        server: '{{url}}'
-        namespace: 'api-gateway-{{env}}'
-      # Production syncPolicy intentionally omits the 'automated' block to disable auto-sync
-      # Changes in Git mark the App as "OutOfSync" in ArgoCD and wait for manual approval and Sync trigger.
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
-        # Production Best Practice: Configured retry policy for manual sync executions
-        retry:
-          limit: 3          # Try syncing 3 times before declaring failure
-          backoff:
-            duration: 5s    # Initial wait duration
-            maxDuration: 3m # Max wait duration
-            factor: 2       # Exponential backoff multiplier
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: ApplicationSet
+# metadata:
+#   name: api-gateway-manual-sync
+#   namespace: argocd
+# spec:
+#   # Generator targeting environments requiring manual approvals (Production)
+#   generators:
+#     - list:
+#         elements:
+#           - env: prod
+#             url: https://kubernetes.default.svc
+#   template:
+#     metadata:
+#       name: 'api-gateway-{{env}}'
+#     spec:
+#       project: default
+#       source:
+#         repoURL: 'https://github.com/htphong01/gitops-demo.git'
+#         targetRevision: main
+#         path: 'k8s/overlays/{{env}}'
+#       destination:
+#         server: '{{url}}'
+#         namespace: 'api-gateway-{{env}}'
+#       # Production syncPolicy intentionally omits the 'automated' block to disable auto-sync
+#       # Changes in Git mark the App as "OutOfSync" in ArgoCD and wait for manual approval and Sync trigger.
+#       syncPolicy:
+#         syncOptions:
+#           - CreateNamespace=true
+#         # Production Best Practice: Configured retry policy for manual sync executions
+#         retry:
+#           limit: 3          # Try syncing 3 times before declaring failure
+#           backoff:
+#             duration: 5s    # Initial wait duration
+#             maxDuration: 3m # Max wait duration
+#             factor: 2       # Exponential backoff multiplier

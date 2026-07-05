@@ -37,11 +37,11 @@ echo "=== 6. Installing ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-echo "=== Waiting for ArgoCD API Server to become ready ==="
-kubectl wait --namespace argocd \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/name=argocd-server \
-  --timeout=180s
+echo "=== Waiting for ArgoCD components to become ready ==="
+kubectl rollout status deployment/argocd-server -n argocd --timeout=180s
+kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=180s
+kubectl rollout status deployment/argocd-redis -n argocd --timeout=180s
+kubectl rollout status statefulset/argocd-application-controller -n argocd --timeout=180s
 
 echo "=== 7. Applying GitOps ApplicationSet ==="
 # Note: Ensure you fork this repository and update repoURL in applicationset.yaml to point to your fork if working on GitHub.
