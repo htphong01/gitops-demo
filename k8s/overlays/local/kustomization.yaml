@@ -7,9 +7,10 @@ kind: Kustomization
 # Isolated local namespace
 namespace: api-gateway-local
 
-# Standard labels specific to local environment instance
-commonLabels:
-  app.kubernetes.io/instance: api-gateway-local
+labels:
+  - pairs:
+      app.kubernetes.io/instance: api-gateway-local
+    includeSelectors: true
 
 resources:
   - ../../base

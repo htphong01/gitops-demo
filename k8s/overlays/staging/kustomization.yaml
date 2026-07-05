@@ -8,9 +8,10 @@ kind: Kustomization
 # Isolates staging resources
 namespace: api-gateway-staging
 
-# Inject environment-specific instance label (avoids base selector lock conflicts)
-commonLabels:
-  app.kubernetes.io/instance: api-gateway-staging
+labels:
+  - pairs:
+      app.kubernetes.io/instance: api-gateway-staging
+    includeSelectors: true
 
 resources:
 - ../../base

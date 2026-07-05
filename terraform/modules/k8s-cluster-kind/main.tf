@@ -29,7 +29,7 @@ resource "kind_cluster" "this" {
       role = "control-plane"
 
       kubeadm_config_patches = [
-        "kind: ClusterConfiguration\napiServer:\n  extraArgs:\n    node-labels: \"ingress-ready=true\"\n"
+        "kind: InitConfiguration\nnodeRegistration:\n  kubeletExtraArgs:\n    node-labels: \"ingress-ready=true\"\n"
       ]
 
       extra_port_mappings {

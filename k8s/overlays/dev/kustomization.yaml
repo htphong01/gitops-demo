@@ -8,9 +8,10 @@ kind: Kustomization
 # Automatically injects namespace isolation
 namespace: api-gateway-dev
 
-# Inject environment-specific instance label (avoids base selector lock conflicts)
-commonLabels:
-  app.kubernetes.io/instance: api-gateway-dev
+labels:
+  - pairs:
+      app.kubernetes.io/instance: api-gateway-dev
+    includeSelectors: true
 
 resources:
 - ../../base
