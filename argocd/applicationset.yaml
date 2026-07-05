@@ -25,7 +25,7 @@ spec:
       project: default
       source:
         # Update this URL to point to your actual GitOps Git repository
-        repoURL: 'https://github.com/mycompany/gitops.git'
+        repoURL: 'https://github.com/htphong01/gitops-demo.git'
         targetRevision: HEAD
         path: 'k8s/overlays/{{env}}'
       destination:
@@ -64,7 +64,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: 'https://github.com/mycompany/gitops.git'
+        repoURL: 'https://github.com/htphong01/gitops-demo.git'
         targetRevision: HEAD
         path: 'k8s/overlays/{{env}}'
       destination:
