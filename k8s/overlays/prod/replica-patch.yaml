@@ -1,0 +1,9 @@
+# replica-patch.yaml (Prod)
+# Targets 3 replicas for High Availability configuration in Production.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 3

@@ -1,0 +1,19 @@
+# ingress-patch.yaml (Staging)
+# Configures staging.api.local as the target Ingress host.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  rules:
+    - host: staging.api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80

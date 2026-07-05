@@ -1,0 +1,107 @@
+# ci.yaml
+# Sample GitHub Actions workflow showing automated CI/CD flow.
+# Performs: Code Checkout -> Mock Build & Push -> Update Kustomize Tag -> Commit & Push to Git (Git Write-Back).
+# Handles multi-env promotion flow: dev/staging on push to main, prod on tagged releases.
+
+name: Continuous Integration & GitOps Write-Back
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*' # Triggered on release tags (e.g., v1.0.0) for production promotion
+    # Avoid blocking tag trigger by using paths-ignore instead of paths
+    paths-ignore:
+      - 'k8s/**'
+      - 'terraform/**'
+      - 'argocd/**'
+      - 'README.md'
+      - '.github/**'
+
+permissions:
+  contents: write # Requires write permission to commit back image tags
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the source repository
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 2: Login to target container registry
+      - name: Login to Docker Registry
+        run: |
+          echo "Logging in to registry..."
+          # docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }}
+
+      # Step 3: Build & Push Docker image
+      - name: Build and Push Docker Image
+        run: |
+          # Use short ref name (e.g., v1.0.0 or main) or git commit sha
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            IMAGE_TAG="${{ github.ref_name }}"
+          else
+            IMAGE_TAG="${{ github.sha }}"
+          fi
+          IMAGE_NAME="mycompany/api-gateway"
+          
+          echo "Building image $IMAGE_NAME:$IMAGE_TAG..."
+          # docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          # docker push $IMAGE_NAME:$IMAGE_TAG
+          echo "Image pushed successfully!"
+
+      # Step 4: Write-back the new image tag into the Kustomize overlays based on Git reference
+      # PROMOTION LOGIC:
+      # - Push to main -> Updates 'dev' and automatically promotes to 'staging' (Integration environment)
+      # - Push tag (e.g., v1.0.0) -> Promotes the specific version tag to 'prod'
+      - name: Update Kustomize Image Tag
+        run: |
+          IMAGE_NAME="mycompany/api-gateway"
+          
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Release tag promotion to Production
+            IMAGE_TAG="${{ github.ref_name }}"
+            echo "Promoting release version $IMAGE_TAG to 'prod' overlay..."
+            cd k8s/overlays/prod
+            kustomize edit set image mycompany/api-gateway=$IMAGE_NAME:$IMAGE_TAG
+          else
+            # Dev & Staging promotion on main commits
+            IMAGE_TAG="${{ github.sha }}"
+            echo "Promoting commit $IMAGE_TAG to 'dev' and 'staging' overlays..."
+            
+            cd k8s/overlays/dev
+            kustomize edit set image mycompany/api-gateway=$IMAGE_NAME:$IMAGE_TAG
+            
+            cd ../staging
+            kustomize edit set image mycompany/api-gateway=$IMAGE_NAME:$IMAGE_TAG
+          fi
+
+      # Step 5: Commit and Push changes back to Git (Git Write-Back flow)
+      # Checks out main branch and pulls latest changes to prevent push failure due to detached HEAD on tag trigger.
+      - name: Commit & Push Changes to Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Fix detached HEAD on tag triggers
+          git checkout main
+          git pull origin main
+          
+          git add k8s/overlays/
+          
+          # Only commit if a new tag was written
+          if ! git diff-index --quiet HEAD; then
+            if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+              COMMIT_MSG="chore(gitops): promote prod api-gateway to release ${{ github.ref_name }} [skip ci]"
+            else
+              COMMIT_MSG="chore(gitops): update dev/staging api-gateway image tag to ${{ github.sha }} [skip ci]"
+            fi
+            git commit -m "$COMMIT_MSG"
+            git push origin main
+          else
+            echo "No image tag changes detected, skipping commit."
+          fi

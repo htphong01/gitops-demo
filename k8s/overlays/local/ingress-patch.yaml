@@ -1,0 +1,10 @@
+# ingress-patch.yaml (Local)
+# Overrides baseline host settings to route traffic through localhost.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  rules:
+    - host: localhost

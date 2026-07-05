@@ -1,0 +1,11 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values.
+
+aws_region         = "ap-southeast-1"          # AWS region for deployment
+environment        = "dev"                     # Target environment (dev)
+cluster_name       = "gitops-cluster-dev"     # Name of the EKS cluster
+subnet_ids         = ["subnet-xxx", "subnet-yyy"]  # VPC subnet IDs
+node_instance_type = "t3.medium"               # EC2 instance type for worker nodes
+desired_size       = 1                         # Desired number of worker nodes
+min_size           = 1                         # Minimum worker nodes
+max_size           = 2                         # Maximum worker nodes

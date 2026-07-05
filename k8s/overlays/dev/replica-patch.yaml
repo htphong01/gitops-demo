@@ -1,0 +1,9 @@
+# replica-patch.yaml (Dev)
+# Restricts replica count to 1 for the Development environment to save computational resources.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1

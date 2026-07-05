@@ -1,0 +1,15 @@
+# image-patch.yaml (Local)
+# Swaps the baseline gateway image with http-echo to prevent container startup loops.
+# listeneing port 8080 matches the baseline health-checks.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  template:
+    spec:
+      containers:
+        - name: api-gateway
+          image: hashicorp/http-echo:latest
+          args: ["-text=api-gateway-local-active", "-listen=:8080"]

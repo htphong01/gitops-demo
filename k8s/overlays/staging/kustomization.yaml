@@ -1,0 +1,31 @@
+# kustomization.yaml (Staging)
+# Customizes baseline resources for the Staging environment.
+# Sets namespace isolation, generates environment ConfigMaps, and applies patches.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Isolates staging resources
+namespace: api-gateway-staging
+
+# Inject environment-specific instance label (avoids base selector lock conflicts)
+commonLabels:
+  app.kubernetes.io/instance: api-gateway-staging
+
+resources:
+  - ../../base
+  - secret-sealed.yaml
+
+# Staging specific ConfigMap generator
+configMapGenerator:
+  - name: api-gateway-config
+    literals:
+      - APP_ENV=staging
+      - LOG_LEVEL=info
+      - DATABASE_URL=mongodb://staging-db.internal:27017/api-staging
+
+# Applies patches
+patches:
+  - path: replica-patch.yaml
+  - path: resource-patch.yaml
+  - path: ingress-patch.yaml

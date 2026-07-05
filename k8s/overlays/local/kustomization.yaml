@@ -1,0 +1,31 @@
+# kustomization.yaml (Local)
+# Assembles local development configurations, overriding baseline settings.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Isolated local namespace
+namespace: api-gateway-local
+
+# Standard labels specific to local environment instance
+commonLabels:
+  app.kubernetes.io/instance: api-gateway-local
+
+resources:
+  - ../../base
+  - secret-sealed.yaml
+
+# Local development config variables mapping
+configMapGenerator:
+  - name: api-gateway-config
+    literals:
+      - APP_ENV=local
+      - LOG_LEVEL=debug
+      - DATABASE_URL=mongodb://localhost:27017/api-local
+
+# Applies environmental override patches
+patches:
+  - path: replica-patch.yaml
+  - path: resource-patch.yaml
+  - path: ingress-patch.yaml
+  - path: image-patch.yaml

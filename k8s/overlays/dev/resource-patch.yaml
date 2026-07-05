@@ -1,0 +1,19 @@
+# resource-patch.yaml (Dev)
+# Reduces CPU and memory requests/limits for the dev environment.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  template:
+    spec:
+      containers:
+        - name: api-gateway
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

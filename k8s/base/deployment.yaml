@@ -1,0 +1,56 @@
+# deployment.yaml (Base)
+# Declares the baseline Deployment structure for api-gateway. Overlays will extend this configuration.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  # Shared metadata label
+  labels:
+    app: api-gateway
+spec:
+  # Defaults to 1 replica. Overridden by environmental overlays.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          # Default image configuration. Image tags are updated dynamically via CI Git write-back.
+          image: mycompany/api-gateway:placeholder
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          # Health check probe configurations
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          # Base container resources configurations
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          # Dynamically inject environment variables and secrets via Kustomize generators/SealedSecrets
+          envFrom:
+            - configMapRef:
+                name: api-gateway-config
+            - secretRef:
+                name: api-gateway-secret

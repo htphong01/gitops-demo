@@ -1,0 +1,6 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and fill in your values.
+
+cluster_name = "gitops-cluster-local"    # Name of the local Kind cluster
+node_image   = "kindest/node:v1.27.3"    # Kind node image matching target K8s version
+worker_nodes = 1                         # Number of worker nodes to spin up locally

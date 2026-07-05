@@ -1,0 +1,19 @@
+# ingress-patch.yaml (Prod)
+# Customizes target hostname to official public URL api.company.com for Production routing.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  rules:
+    - host: api.company.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80

@@ -1,0 +1,31 @@
+# kustomization.yaml (Dev)
+# Customizes baseline resources for the Development environment.
+# Sets namespace isolation, generates environment ConfigMaps, and applies patches.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Automatically injects namespace isolation
+namespace: api-gateway-dev
+
+# Inject environment-specific instance label (avoids base selector lock conflicts)
+commonLabels:
+  app.kubernetes.io/instance: api-gateway-dev
+
+resources:
+  - ../../base
+  - secret-sealed.yaml
+
+# Dynamically generates ConfigMaps and appends a hash suffix to trigger rolling pods restart upon change
+configMapGenerator:
+  - name: api-gateway-config
+    literals:
+      - APP_ENV=dev
+      - LOG_LEVEL=debug
+      - DATABASE_URL=mongodb://dev-db.internal:27017/api-dev
+
+# Applies custom patches to override baseline defaults
+patches:
+  - path: replica-patch.yaml
+  - path: resource-patch.yaml
+  - path: ingress-patch.yaml

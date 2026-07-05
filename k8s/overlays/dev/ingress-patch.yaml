@@ -1,0 +1,19 @@
+# ingress-patch.yaml (Dev)
+# Customizes the Ingress hostname to dev.api.local for Development environments.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  rules:
+    - host: dev.api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80

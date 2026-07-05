@@ -1,0 +1,31 @@
+# ingress.yaml (Base)
+# Declares the base Ingress rule directing traffic into the cluster.
+# Bundles production-ready annotation configurations for Nginx Ingress Controller.
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-gateway
+  annotations:
+    # Forces HTTP to HTTPS redirection (simulated for prod routing)
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Limits file uploads size to 10MB
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # Network connection timeouts to downstream service
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "15"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+spec:
+  # Modern ingress class definition (Kubernetes 1.22+ standard)
+  ingressClassName: nginx
+  rules:
+    # Default hostname. Overridden by environmental overlays.
+    - host: api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 80

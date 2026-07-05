@@ -1,0 +1,31 @@
+# kustomization.yaml (Prod)
+# Customizes baseline resources for the Production environment.
+# Sets namespace isolation, generates environment ConfigMaps, and applies patches.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Isolates production resources
+namespace: api-gateway-prod
+
+# Inject environment-specific instance label (avoids base selector lock conflicts)
+commonLabels:
+  app.kubernetes.io/instance: api-gateway-prod
+
+resources:
+  - ../../base
+  - secret-sealed.yaml
+
+# Production ConfigMap generator with high availability database URLs
+configMapGenerator:
+  - name: api-gateway-config
+    literals:
+      - APP_ENV=production
+      - LOG_LEVEL=warn
+      - DATABASE_URL=mongodb://prod-db-primary.internal:27017,prod-db-secondary.internal:27017/api-prod?replicaSet=rs0
+
+# Applies patches
+patches:
+  - path: replica-patch.yaml
+  - path: resource-patch.yaml
+  - path: ingress-patch.yaml

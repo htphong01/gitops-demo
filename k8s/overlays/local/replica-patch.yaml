@@ -1,0 +1,9 @@
+# replica-patch.yaml (Local)
+# Scales downstream replica down to 1 for minimal local workstation load.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
