@@ -27,6 +27,9 @@ kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/downloa
 echo "=== 5. Installing NGINX Ingress Controller for Kind ==="
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
+echo "=== Patching NGINX Ingress Controller to bind to control-plane ==="
+kubectl patch deployment ingress-nginx-controller -n ingress-nginx -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"}}}}}'
+
 echo "=== Waiting for NGINX Ingress Controller to become ready (this can take 1-2 minutes) ==="
 kubectl wait --namespace ingress-nginx \
   --for=condition=ready pod \
