@@ -42,5 +42,5 @@ resource "kind_cluster" "this" {
 # Automatically output the kubeconfig to a local file in the environment directory for seamless DX
 resource "local_file" "kubeconfig" {
   content  = kind_cluster.this.kubeconfig
-  filename = "${path.module}/../../kubeconfig.yaml"
+  filename = "${path.module}/../../environments/local/kubeconfig.yaml"
 }

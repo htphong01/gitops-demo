@@ -154,7 +154,7 @@ To easily evaluate and demonstrate this repository locally, we provide a 1-click
    ```
 3. Once completed, query the local deployment sync status:
    ```bash
-   export KUBECONFIG=./kubeconfig.yaml
+   export KUBECONFIG=./terraform/environments/local/kubeconfig.yaml
    kubectl get pods -n api-gateway-local
    ```
 4. Access the active local web service:

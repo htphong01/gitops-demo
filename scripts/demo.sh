@@ -13,7 +13,7 @@ terraform init
 terraform apply -auto-approve
 
 echo "=== 2. Exporting Kubeconfig ==="
-export KUBECONFIG="$REPO_ROOT/kubeconfig.yaml"
+export KUBECONFIG="$REPO_ROOT/terraform/environments/local/kubeconfig.yaml"
 kubectl cluster-info
 
 echo "=== 3. Restoring Sealed Secrets Private Key ==="
