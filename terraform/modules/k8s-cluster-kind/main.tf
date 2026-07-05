@@ -4,7 +4,7 @@
 terraform {
   required_providers {
     kind = {
-      source  = "tehcnosoft/kind"
+      source  = "tehcyx/kind"
       version = "~> 0.6"
     }
     local = {
