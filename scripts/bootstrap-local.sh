@@ -1,5 +1,5 @@
 #!/bin/bash
-# demo.sh
+# bootstrap-local.sh
 # Automates local workstation GitOps infrastructure setup using Kind, ArgoCD, and Sealed Secrets.
 
 set -e
@@ -13,7 +13,7 @@ terraform init
 terraform apply -auto-approve
 
 echo "=== 2. Exporting Kubeconfig ==="
-export KUBECONFIG="$REPO_ROOT/kubeconfig.yaml"
+export KUBECONFIG="$REPO_ROOT/terraform/environments/local/kubeconfig.yaml"
 kubectl cluster-info
 
 echo "=== 3. Restoring Sealed Secrets Private Key ==="
@@ -27,21 +27,21 @@ kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/downloa
 echo "=== 5. Installing NGINX Ingress Controller for Kind ==="
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
+echo "=== Patching NGINX Ingress Controller to bind to control-plane ==="
+kubectl patch deployment ingress-nginx-controller -n ingress-nginx -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"}}}}}'
+
 echo "=== Waiting for NGINX Ingress Controller to become ready (this can take 1-2 minutes) ==="
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=180s
+kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
 
 echo "=== 6. Installing ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-echo "=== Waiting for ArgoCD API Server to become ready ==="
-kubectl wait --namespace argocd \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/name=argocd-server \
-  --timeout=180s
+echo "=== Waiting for ArgoCD components to become ready ==="
+kubectl rollout status deployment/argocd-server -n argocd --timeout=180s
+kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=180s
+kubectl rollout status deployment/argocd-redis -n argocd --timeout=180s
+kubectl rollout status statefulset/argocd-application-controller -n argocd --timeout=180s
 
 echo "=== 7. Applying GitOps ApplicationSet ==="
 # Note: Ensure you fork this repository and update repoURL in applicationset.yaml to point to your fork if working on GitHub.

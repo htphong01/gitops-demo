@@ -13,7 +13,7 @@ terraform {
 
 # IAM Role for EKS Cluster control plane
 resource "aws_iam_role" "eks_cluster" {
-  name = "eks-cluster-role-${var.cluster_name}-${var.environment}"
+  name = "${var.project}-${var.environment}-eks-cluster-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -35,7 +35,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
 
 # EKS Cluster Resource definition
 resource "aws_eks_cluster" "this" {
-  name     = "${var.cluster_name}-${var.environment}"
+  name     = "${var.project}-${var.environment}-cluster"
   role_arn = aws_iam_role.eks_cluster.arn
 
   # VPC subnet configuration using parameterized input variables
@@ -52,7 +52,7 @@ resource "aws_eks_cluster" "this" {
 
 # IAM Role for Managed Worker Nodes
 resource "aws_iam_role" "eks_nodes" {
-  name = "eks-node-role-${var.cluster_name}-${var.environment}"
+  name = "${var.project}-${var.environment}-eks-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -85,7 +85,7 @@ resource "aws_iam_role_policy_attachment" "eks_registry" {
 # Managed Node Group definition
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "default-workers-${var.environment}"
+  node_group_name = "${var.project}-${var.environment}-default-workers"
   node_role_arn   = aws_iam_role.eks_nodes.arn
   subnet_ids      = var.subnet_ids
 

@@ -8,24 +8,29 @@ kind: Kustomization
 # Isolates staging resources
 namespace: api-gateway-staging
 
-# Inject environment-specific instance label (avoids base selector lock conflicts)
-commonLabels:
-  app.kubernetes.io/instance: api-gateway-staging
+labels:
+  - pairs:
+      app.kubernetes.io/instance: api-gateway-staging
+    includeSelectors: true
 
 resources:
-  - ../../base
-  - secret-sealed.yaml
+- ../../base
+- secret-sealed.yaml
 
 # Staging specific ConfigMap generator
 configMapGenerator:
-  - name: api-gateway-config
-    literals:
-      - APP_ENV=staging
-      - LOG_LEVEL=info
-      - DATABASE_URL=mongodb://staging-db.internal:27017/api-staging
+- literals:
+  - APP_ENV=staging
+  - LOG_LEVEL=info
+  - DATABASE_URL=mongodb://staging-db.internal:27017/api-staging
+  name: api-gateway-config
 
 # Applies patches
 patches:
-  - path: replica-patch.yaml
-  - path: resource-patch.yaml
-  - path: ingress-patch.yaml
+- path: replica-patch.yaml
+- path: resource-patch.yaml
+- path: ingress-patch.yaml
+images:
+- name: mycompany/api-gateway
+  newName: mycompany/api-gateway
+  newTag: d61c48e54f6a9c4b8867cc27ff5dbb31a40edf33

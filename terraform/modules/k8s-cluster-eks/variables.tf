@@ -6,6 +6,12 @@ variable "cluster_name" {
   type        = string
 }
 
+variable "project" {
+  description = "The project name used for resource naming and tagging"
+  type        = string
+  default     = "gitops-demo"
+}
+
 variable "environment" {
   description = "Target deployment environment (dev, staging, prod)"
   type        = string

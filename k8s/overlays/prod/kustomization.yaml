@@ -8,9 +8,10 @@ kind: Kustomization
 # Isolates production resources
 namespace: api-gateway-prod
 
-# Inject environment-specific instance label (avoids base selector lock conflicts)
-commonLabels:
-  app.kubernetes.io/instance: api-gateway-prod
+labels:
+  - pairs:
+      app.kubernetes.io/instance: api-gateway-prod
+    includeSelectors: true
 
 resources:
   - ../../base

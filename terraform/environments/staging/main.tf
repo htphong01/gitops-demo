@@ -5,6 +5,7 @@ module "k8s_cluster" {
   source = "../../modules/k8s-cluster-eks"
 
   cluster_name       = var.cluster_name
+  project            = var.project
   environment        = var.environment
   subnet_ids         = var.subnet_ids
   node_instance_type = var.node_instance_type
