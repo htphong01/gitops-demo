@@ -15,3 +15,9 @@ variable "worker_nodes" {
   description = "Number of worker nodes for the Kind cluster"
   type        = number
 }
+
+variable "kubeconfig_path" {
+  description = "Path to write the local kubeconfig file"
+  type        = string
+  default     = "kubeconfig.yaml"
+}

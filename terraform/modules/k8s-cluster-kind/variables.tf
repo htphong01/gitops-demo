@@ -18,3 +18,8 @@ variable "worker_nodes" {
   type        = number
   default     = 0
 }
+
+variable "kubeconfig_path" {
+  description = "The local path where the kubeconfig file should be written"
+  type        = string
+}

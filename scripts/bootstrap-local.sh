@@ -1,5 +1,5 @@
 #!/bin/bash
-# demo.sh
+# bootstrap-local.sh
 # Automates local workstation GitOps infrastructure setup using Kind, ArgoCD, and Sealed Secrets.
 
 set -e
@@ -31,10 +31,7 @@ echo "=== Patching NGINX Ingress Controller to bind to control-plane ==="
 kubectl patch deployment ingress-nginx-controller -n ingress-nginx -p '{"spec":{"template":{"spec":{"nodeSelector":{"ingress-ready":"true"}}}}}'
 
 echo "=== Waiting for NGINX Ingress Controller to become ready (this can take 1-2 minutes) ==="
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=180s
+kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
 
 echo "=== 6. Installing ArgoCD ==="
 kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -

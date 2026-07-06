@@ -41,3 +41,9 @@ variable "max_size" {
   description = "Maximum number of worker nodes"
   type        = number
 }
+
+variable "project" {
+  description = "Project name for resource naming and tagging"
+  type        = string
+  default     = "gitops-demo"
+}
